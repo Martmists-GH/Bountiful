@@ -13,6 +13,7 @@ class BountifulConfigData {
     var boardUpdateFrequency: Int = 45
     var boardGenFrequency: Int = 2
     var flatBonusTimePerBounty: Int = 0
+    var shouldReputationDecreaseOnFail = false
     var shouldBountiesHaveTimersAndExpire = true
     var dataPackExclusions = listOf(
         "bounty_pools/bountiful/example_pool",
@@ -22,6 +23,7 @@ class BountifulConfigData {
     var objectiveModifier = 0
     var maxNumRewards = 2
     var showCompletionToast = true
+    var allowMultipleCopies = true
 
     fun buildScreen(): Screen {
         val builder = ConfigBuilder.create()
@@ -93,6 +95,17 @@ class BountifulConfigData {
             }.build()
         )
 
+        board.addEntry(
+            creator.startBooleanToggle(
+                Text.literal("Reputation Decrease on Fail"),
+                shouldReputationDecreaseOnFail
+            ).setDefaultValue(false).setTooltip(
+                Text.literal("Whether reputation should decrease when a bounty is taken but not completed")
+            ).setSaveConsumer {
+                shouldReputationDecreaseOnFail = it
+            }.build()
+        )
+
         val bounty = builder.getOrCreateCategory(Text.literal("General - Bounty"))
 
         bounty.addEntry(
@@ -131,6 +144,17 @@ class BountifulConfigData {
                 maxNumRewards = it
             }.setTextGetter {
                 textLiteral("$it Rewards")
+            }.build()
+        )
+
+        bounty.addEntry(
+            creator.startBooleanToggle(
+                Text.literal("Allow Multiple Copies"),
+                allowMultipleCopies
+            ).setDefaultValue(true).setTooltip(
+                Text.literal("Whether multiple copies of the same bounty can be taken by different players")
+            ).setSaveConsumer {
+                allowMultipleCopies = it
             }.build()
         )
 

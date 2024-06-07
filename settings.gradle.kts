@@ -30,7 +30,7 @@ dependencyResolutionManagement {
             }
 
             val Ejekta = object {
-                val Kambrik = "6.1.0"
+                val Kambrik = "6.1.1"
                 val KambrikSnapshot = true
             }
 

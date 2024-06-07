@@ -42,7 +42,7 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState)
     NamedScreenHandlerFactory {
 
     private val decrees = SimpleInventory(3)
-    private val bounties = BountyInventory()
+    internal val bounties = BountyInventory()
 
     private var takenMask = mutableMapOf<String, MutableSet<Int>>()
     private val takenSerializer = MapSerializer(String.serializer(), SetSerializer(Int.serializer()))
@@ -51,7 +51,7 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState)
         return takenMask.getOrPut(player.uuidAsString) { mutableSetOf() }
     }
 
-    private var finishMap = mutableMapOf<String, Int>()
+    internal var finishMap = mutableMapOf<String, Int>()
     private val finishSerializer = MapSerializer(String.serializer(), Int.serializer())
 
     // Whether this board has even been initialized/given starting data
@@ -60,7 +60,7 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState)
 
     // Calculated level, progress to next, point of next level
     private val levelData: Triple<Int, Int, Int>
-        get() = levelProgress(finishMap.values.sum())
+        get() = levelProgress(finishMap.values.sum().coerceAtLeast(0))
 
     private fun setDecree() {
         if (world is ServerWorld && decrees.isEmpty) {
@@ -74,12 +74,12 @@ class BoardBlockEntity(pos: BlockPos, state: BlockState)
     }
 
     val numCompleted: Int
-        get() = finishMap.values.sum()
+        get() = finishMap.values.sum().coerceAtLeast(0)
 
     fun updateCompletedBounties(player: PlayerEntity) {
         finishMap[player.uuidAsString] = finishMap.getOrPut(player.uuidAsString) {
             0
-        } + 1
+        } + if (BountifulIO.configData.shouldReputationDecreaseOnFail) 2 else 1
     }
 
     private fun getBoardDecrees(): Set<Decree> {

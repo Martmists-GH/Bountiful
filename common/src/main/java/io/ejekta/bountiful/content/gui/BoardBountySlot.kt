@@ -1,5 +1,6 @@
 package io.ejekta.bountiful.content.gui
 
+import io.ejekta.bountiful.config.BountifulIO
 import io.ejekta.bountiful.content.board.BoardBlockEntity
 import io.ejekta.bountiful.content.board.BoardInventory
 import io.ejekta.bountiful.util.readOnlyCopy
@@ -26,9 +27,17 @@ class BoardBountySlot(val inv: BoardInventory, index: Int, x: Int, y: Int) : Slo
                     }
                 }.filterNotNull()
             for (newIndex in matchingMaskIndices) {
-                board.maskFor(player).add(newIndex)
+                if (BountifulIO.configData.shouldReputationDecreaseOnFail) {
+                    board.finishMap[player.uuidAsString] = board.finishMap.getOrDefault(player.uuidAsString, 0) - 1
+                }
+                if (BountifulIO.configData.allowMultipleCopies) {
+                    board.maskFor(player).add(newIndex)
+                } else {
+                    board.bounties.removeStack(newIndex)
+                }
             }
         }
+
         super.onTakeItem(player, stack)
         return true
     }
